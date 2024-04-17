@@ -13,7 +13,6 @@ class CustomDataset(Dataset):
         on_bad_lines='skip', header=None, names=['Sentence', 'Label'])
         self.data = self.data[self.data['Label'].notna()]
         self.data = self.data[pd.to_numeric(self.data['Label'], errors='coerce').notnull()]
-        print(self.data['Label'].value_counts())
         self.tokenizer = tokenizer
         self.max_length = max_length
         
