@@ -8,6 +8,7 @@ constrained devices and tasks. Model quantization techniques
 however trade fine-tuning and inference time for model efficacy. In
 order to bridge this gap in accuracy, we are attempting model 
 aggregation techniques on top of model quantization.
+
 Our project, focused on optimizing NLP models for resource 
 constrained devices, directly benefits queries requiring swift inference
 like SQL injection classification, emergency response tweet 
@@ -15,6 +16,7 @@ categorization and stock market headline information extraction. By
 implementing efficient model quantization and weight aggregation
 techniques, our approach aims to rapidly classify text data without
 compromising accuracy.
+
 In reviewing related work, previous research has explored 
 various techniques in quantization and model souping but in entirely
 different domains. While these approaches have shown promise,
