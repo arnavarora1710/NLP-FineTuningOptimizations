@@ -1,4 +1,4 @@
-import sys
+import sys, os
 sys.path.append("../")
 import time
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     dataloader_funs = [get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader]
     test_dataset, test_loader = dataloader_funs[problem_num](test_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
     
-    weight_files = ["1e-05.pth", "5e-05.pth", "0.00025.pth"]
+    weight_files = [w for w in os.listdir(weights_folder)]
     weight_files = [weights_folder + w for w in weight_files]
     weights = [torch.load(w) for w in weight_files]
     
