@@ -7,7 +7,7 @@ from sklearn.metrics import f1_score
 
 import torch
 torch.manual_seed(42)
-from dataloader import get_sql_dataloader, get_crisis_data_loader, get_stock_data_loader
+from dataloader import get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 def train_batch(model, batch, optimizer):
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    dataloader_funs = [get_sql_dataloader, get_crisis_data_loader, get_stock_data_loader]
+    dataloader_funs = [get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader]
     train_dataset, train_loader = dataloader_funs[problem_num](train_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
     test_dataset, test_loader = dataloader_funs[problem_num](test_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
 
