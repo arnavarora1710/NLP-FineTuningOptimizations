@@ -69,7 +69,7 @@ if __name__ == "__main__":
         print("Usage: python train.py <problem_num> <train_data_path> <test_data_path> <learning_rate>*")
         sys.exit(1)
     
-    problem_num = sys.argv[1] - 1
+    problem_num = int(sys.argv[1]) - 1
     train_data_path = sys.argv[2]
     test_data_path = sys.argv[3]
 
