@@ -7,7 +7,7 @@ from sklearn.metrics import f1_score
 
 import torch
 torch.manual_seed(42)
-from datasets import get_sql_dataloader, get_crisis_data_loader, get_stock_data_loader
+from dataloader import get_sql_dataloader, get_crisis_data_loader, get_stock_data_loader
 from transformers import AutoTokenizer, BertForSequenceClassification
 
 def train_batch(model, batch, optimizer):
