@@ -9,7 +9,7 @@ import torch
 from dataloader import get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader
 from transformers import AutoTokenizer, BertForSequenceClassification 
 
-from trainv1 import test_model
+from train import test_model
 
 def avg_soup_models(weights):
     avg_weights = {}

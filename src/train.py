@@ -1,86 +1,122 @@
+import sys
+sys.path.append("../")
+import time
+
+import numpy as np
+from sklearn.metrics import f1_score
+
 import torch
-from torch.utils.data import DataLoader, Dataset
-from transformers import AutoTokenizer, BertForSequenceClassification, AdamW
-import pandas as pd
 torch.manual_seed(42)
+from dataloader import get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader
+from transformers import AutoTokenizer, BertForSequenceClassification
 
-train_data_path = "../data/SQLInjections/sqli.csv"
-test_data_path = "../data/SQLInjections/sqliv2.csv"
+def train_batch(model, batch, optimizer):
+    input_ids = batch['input_ids'].to(device)
+    attention_mask = batch['attention_mask'].to(device)
+    labels = batch['labels'].to(device)
 
-class CustomDataset(Dataset):
-    def __init__(self, data_path, tokenizer, max_length):
-        self.data = pd.read_csv(data_path, encoding='utf-16', 
-        on_bad_lines='skip', header=None, names=['Sentence', 'Label'])
-        self.data = self.data[self.data['Label'].notna()]
-        self.data = self.data[pd.to_numeric(self.data['Label'], errors='coerce').notnull()]
-        self.tokenizer = tokenizer
-        self.max_length = max_length
-        
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, idx):
-        text = str(self.data.iloc[idx]['Sentence'])
-        label = int(self.data.iloc[idx]['Label'])
-        encoding = self.tokenizer(text, padding='max_length', truncation=True, max_length=self.max_length, return_tensors='pt')
-        return {
-            'input_ids': encoding['input_ids'].flatten(),
-            'attention_mask': encoding['attention_mask'].flatten(),
-            'labels': torch.tensor(label)
-        }
+    optimizer.zero_grad()
 
-tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-train_dataset = CustomDataset(train_data_path, tokenizer, max_length=64)
-test_dataset = CustomDataset(test_data_path, tokenizer, max_length=64)
+    outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
 
-model = BertForSequenceClassification.from_pretrained("bert-base-uncased")
-optimizer = AdamW(model.parameters(), lr=1e-5)
+    loss = outputs.loss
+    loss.backward()
+    optimizer.step()
 
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+    return loss.item()
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-
-num_epochs = 3
-for epoch in range(num_epochs):
+def train_epoch(model, train_loader, optimizer):
     model.train()
-    sum = 0
-    cnt = 0
+    total_loss = 0
+    c = 0
     for batch in train_loader:
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        labels = batch['labels'].to(device)
+        loss = train_batch(model, batch, optimizer)
+        total_loss += loss
+        c += 1
+    return total_loss / c
+
+def train_model(model, train_loader, optimizer, num_epochs):
+    for epoch in range(num_epochs):
+        loss = train_epoch(model, train_loader, optimizer)
+        print(f"Epoch {epoch + 1}, Loss: {loss}")
+
+def test_batch(model, batch):
+    input_ids = batch['input_ids'].to(model.device)
+    attention_mask = batch['attention_mask'].to(model.device)
+    labels = batch['labels'].to(model.device)
+
+    outputs = model(input_ids, attention_mask=attention_mask)
+    logits = outputs.logits
+    predictions = torch.argmax(logits, dim=1)
+
+    return labels, predictions
+
+def test_model(model, test_dataset, test_loader):
+    model.eval()
+    labels = np.zeros(len(test_dataset))
+    predictions = np.zeros(len(test_dataset))
+    
+    with torch.no_grad():
+        for i, batch in enumerate(test_loader):
+            labels_batch, predictions_batch = test_batch(model, batch)
+            start = i * len(labels_batch)
+            end = start + len(labels_batch)
+            labels[start:end] = labels_batch.cpu().numpy()
+            predictions[start:end] = predictions_batch.cpu().numpy()
+            
+    return labels, predictions
+
+if __name__ == "__main__":
+    if (len(sys.argv) < 3):
+        print("Usage: python train.py <problem_num> <train_data_path> <test_data_path> <learning_rate>*")
+        sys.exit(1)
+    
+    problem_num = int(sys.argv[1]) - 1
+    train_data_path = sys.argv[2]
+    test_data_path = sys.argv[3]
+
+
+    BATCH_SIZE = 8
+    EPOCHS = 5
+    NUM_MODELS = max(1, len(sys.argv) - 3)
+
+    tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    dataloader_funs = [get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader]
+    folder_names = ["sql_weights", "crisis_weights", "stock_weights"]
+    train_dataset, train_loader = dataloader_funs[problem_num](train_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
+    test_dataset, test_loader = dataloader_funs[problem_num](test_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
+
+    lrs = [float(lr) for lr in sys.argv[4:]]
+    if len(lrs) == 0:
+        lrs.append(1e-5)
+
+    models = [BertForSequenceClassification.from_pretrained("bert-base-uncased") for _ in range(NUM_MODELS)]
+    if (problem_num == 1):
+        models = [BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=9, 
+        problem_type = "multi_label_classification") for _ in range(NUM_MODELS)]
+
+    optimizers = [torch.optim.AdamW(model.parameters(), lr=lr) for model, lr in zip(models, lrs)]
+
+    for i, (model, optimizer) in enumerate(zip(models, optimizers)):
+        model.to(device)
+        train_model(model, train_loader, optimizer, EPOCHS)
+        torch.save(model.state_dict(), f"{folder_names[problem_num]}/{lrs[i]}.pth")
+
+        # TODO: Vary this for different quantization levels
+        model.to(torch.float16)
         
-        optimizer.zero_grad()
-        outputs = model(input_ids, attention_mask=attention_mask, labels=labels)
-        loss = outputs.loss
-        loss.backward()
-        optimizer.step()
-        sum += loss.item()
-        cnt += 1
-        print(f'Loss: {loss.item()}')
-    print()
-    print(f"Average Epoch Loss: {sum/cnt}")
-    print()
+        start_time = time.time()
+        labels, predictions = test_model(model, test_dataset, test_loader)
+        end_time = time.time()
 
-test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
-
-model.eval()
-num_correct = 0
-total_predictions = 0
-
-with torch.no_grad():
-    for batch in test_loader:
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        labels = batch['labels'].to(device)
+        print(f"Time taken: {end_time - start_time} seconds")
         
-        outputs = model(input_ids, attention_mask=attention_mask)
-        logits = outputs.logits
-        predictions = torch.argmax(logits, dim=1)
+        f1 = f1_score(labels, predictions)
+        accuracy = np.mean(labels == predictions)
         
-        num_correct += (predictions == labels).sum().item()
-        total_predictions += labels.size(0)
-
-accuracy = num_correct / total_predictions
-print(f"Accuracy on the test set: {accuracy}")
+        print(f"Learning Rate: {lrs[i]}")
+        print(f"F1 Score: {f1}")
+        print(f"Accuracy: {accuracy}")
+        print(f"\n\n\n\n")
