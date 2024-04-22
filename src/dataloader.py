@@ -3,25 +3,6 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-def one_hot_encode(labels):
-    maps = {
-        'Injured or dead people': 0,
-        'Missing, trapped, or found people': 1,
-        'Displaced people and evacuations': 2,
-        'Infrastructure and utilities damage': 3,
-        'Donation needs or offers or volunteering services': 4,
-        'Caution and advice': 5,
-        'Sympathy and emotional support': 6,
-        'Other useful information': 7,
-        'Not related or irrelevant': 8
-    }
-    
-    one_hot = torch.zeros(len(labels), 9)
-    for i, label in enumerate(labels):
-        one_hot[i][maps[label]] = 1
-
-    return one_hot
-
 class SQLDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
         self.data = pd.read_csv(data_path, encoding='utf-16', 
