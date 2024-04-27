@@ -14,7 +14,6 @@ def avg_soup_models(weights):
         curr_weights = [w[key].to(torch.float32) for w in weights]
         curr_stack = torch.stack(curr_weights)
         avg_weights[key] = torch.mean(curr_stack, dim=0)
-
     return avg_weights
 
 def test_weights(model, weights, test_dataset, test_dataloader, quantize=False, multi_label=False):
