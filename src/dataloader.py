@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+<<<<<<< HEAD
 maps = {
     'Injured or dead people': 0,
     'Missing, trapped, or found people': 1,
@@ -20,6 +21,8 @@ def one_hot_encode(labels):
         one_hot[i][maps[label]] = 1
     return one_hot
 
+=======
+>>>>>>> 380224be430f8f99d82a09e222adfd433225271b
 class SQLDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
         self.data = pd.read_csv(data_path, encoding='utf-16',
