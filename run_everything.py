@@ -24,6 +24,5 @@ configs = [
     "python3 souper.py 3 ./data/StockPredictions/test.csv ./src/stock_weights/ True weight > ./results/stock/stock_weighted_mean_quantized.txt"
 ]
 
-# Execute each script with the corresponding configuration
 for config in configs:
     subprocess.run(config, shell=True)
