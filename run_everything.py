@@ -1,9 +1,9 @@
 import subprocess
 
 configs = [
-    "python3 train.py 1 ./data/SQLInjections/sqli.csv ./data/SQLInjections/sqliv2.csv 1e-5 2e-5 3e-5",
-    "python3 train.py 2 ./data/CrisisNLP/train.csv ./data/CrisisNLP/test.csv 1e-5 2e-5 3e-5",
-    "python3 train.py 3 ./data/StockPredictions/train.csv ./data/StockPredictions/test.csv 1e-5 2e-5 3e-5",
+    "python3 train.py 1 ./data/SQLInjections/sqli.csv ./data/SQLInjections/sqliv2.csv 15 1e-5 2e-5 3e-5",
+    "python3 train.py 2 ./data/CrisisNLP/train.csv ./data/CrisisNLP/test.csv 15 1e-5 2e-5 3e-5",
+    "python3 train.py 3 ./data/StockPredictions/train.csv ./data/StockPredictions/test.csv 10 1e-5 2e-5 3e-5",
     "python3 souper.py 1 ./data/SQLInjections/sqliv2.csv ./src/sql_weights/ False mean > ./results/sql/sql_mean.txt",
     "python3 souper.py 1 ./data/SQLInjections/sqliv2.csv ./src/sql_weights/ True mean > ./results/sql/sql_mean_quantized.txt",
     "python3 souper.py 1 ./data/SQLInjections/sqliv2.csv ./src/sql_weights/ False median > ./results/sql/sql_median.txt",
