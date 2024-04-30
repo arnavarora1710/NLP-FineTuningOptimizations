@@ -81,7 +81,7 @@ if __name__ == "__main__":
     test_data_path = sys.argv[3]
 
     BATCH_SIZE = 32
-    EPOCHS = sys.argv[4]
+    EPOCHS = int(sys.argv[4])
     NUM_MODELS = max(1, len(sys.argv) - 5)
 
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
