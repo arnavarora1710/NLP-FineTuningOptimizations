@@ -73,7 +73,7 @@ def test_model_2(model, test_dataset, test_loader):
 
 if __name__ == "__main__":
     if (len(sys.argv) < 3):
-        print("Usage: python train.py <problem_num> <train_data_path> <test_data_path> <learning_rate>*")
+        print("Usage: python train.py <problem_num> <train_data_path> <test_data_path> <num_epochs> <learning_rate>*")
         sys.exit(1)
 
     problem_num = int(sys.argv[1]) - 1
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     test_data_path = sys.argv[3]
 
     BATCH_SIZE = 32
-    EPOCHS = 15
-    NUM_MODELS = max(1, len(sys.argv) - 4)
+    EPOCHS = sys.argv[4]
+    NUM_MODELS = max(1, len(sys.argv) - 5)
 
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     train_dataset, train_loader = dataloader_funs[problem_num](train_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
     test_dataset, test_loader = dataloader_funs[problem_num](test_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
 
-    lrs = [float(lr) for lr in sys.argv[4:]]
+    lrs = [float(lr) for lr in sys.argv[5:]]
     if len(lrs) == 0:
         lrs.append(1e-5)
 
