@@ -72,12 +72,20 @@ def test_weights(model, weights, test_dataset, test_dataloader, quantize, multi_
     
     return accuracy
     
+def print_configuration(problem_num, test_data_path, weights_folder, quantize, soup_type):
+    print("Configuration:")
+    print(f"Problem Number: {problem_num}")
+    print(f"Test Data Path: {test_data_path}")
+    print(f"Weights Folder: {weights_folder}")
+    print(f"Quantize: {quantize}")
+    print(f"Soup Type: {soup_type}")
+
 if __name__ == "__main__":
     BATCH_SIZE = 32
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     if len(sys.argv) < 4:
-        print("Usage: python souper.py <problem_num> <test_data_path> <weights_folder> <quantize_or_not> <soup_type>")
+        print("Usage: python3 souper.py <problem_num> <test_data_path> <weights_folder> <quantize_or_not> <soup_type>")
         sys.exit(1)
         
     problem_num = int(sys.argv[1]) - 1
@@ -85,6 +93,9 @@ if __name__ == "__main__":
     weights_folder = sys.argv[3]
     quantize = sys.argv[4] == "True"
     soup_type = sys.argv[5]
+
+    print_configuration(problem_num, test_data_path, weights_folder, quantize, soup_type)
+
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     
     dataloader_funs = [get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader]

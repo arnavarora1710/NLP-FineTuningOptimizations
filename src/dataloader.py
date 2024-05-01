@@ -3,22 +3,16 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 maps = {
-    'Injured or dead people': 0,
-    'Missing, trapped, or found people': 1,
-    'Displaced people and evacuations': 2,
-    'Infrastructure and utilities damage': 3,
-    'Donation needs or offers or volunteering services': 4,
-    'Caution and advice': 5,
-    'Sympathy and emotional support': 6,
-    'Other useful information': 7,
-    'Not related or irrelevant': 8
+    'injured_or_dead_people': 0,
+    'missing_trapped_or_found_people': 1,
+    'displaced_people_and_evacuations': 2,
+    'infrastructure_and_utilities_damage': 3,
+    'donation_needs_or_offers_or_volunteering_services': 4,
+    'caution_and_advice': 5,
+    'sympathy_and_emotional_support': 6,
+    'other_useful_information': 7,
+    'not_related_or_irrelevant': 8
 }
-
-def one_hot_encode(labels):
-    one_hot = torch.zeros(len(labels), 9)
-    for i, label in enumerate(labels):
-        one_hot[i][maps[label]] = 1
-    return one_hot
 
 class SQLDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):

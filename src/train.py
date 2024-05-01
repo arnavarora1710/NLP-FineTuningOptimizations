@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import time
 import numpy as np
 from sklearn.metrics import f1_score
@@ -71,9 +71,17 @@ def test_model_2(model, test_dataset, test_loader):
             predictions[start:end] = predictions_batch.cpu().numpy()
     return labels, predictions
 
+def print_configuration(problem_num, train_data_path, test_data_path, num_epochs, learning_rates):
+    print("Configuration:")
+    print(f"Problem Number: {problem_num}")
+    print(f"Train Data Path: {train_data_path}")
+    print(f"Test Data Path: {test_data_path}")
+    print(f"Number of Epochs: {num_epochs}")
+    print(f"Learning Rates: {learning_rates}")
+
 if __name__ == "__main__":
     if (len(sys.argv) < 3):
-        print("Usage: python train.py <problem_num> <train_data_path> <test_data_path> <num_epochs> <learning_rate>*")
+        print("Usage: python3 train.py <problem_num> <train_data_path> <test_data_path> <num_epochs> <learning_rate>*")
         sys.exit(1)
 
     problem_num = int(sys.argv[1]) - 1
@@ -90,12 +98,17 @@ if __name__ == "__main__":
     dataloader_funs = [get_sql_dataloader, get_crisis_dataloader, get_stock_dataloader]
     folder_names = ["sql_weights", "crisis_weights", "stock_weights"]
 
+    if not os.path.exists(folder_names[problem_num]):
+        os.makedirs(folder_names[problem_num])
+
     train_dataset, train_loader = dataloader_funs[problem_num](train_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
     test_dataset, test_loader = dataloader_funs[problem_num](test_data_path, tokenizer, max_length=64, batch_size=BATCH_SIZE)
 
     lrs = [float(lr) for lr in sys.argv[5:]]
     if len(lrs) == 0:
         lrs.append(1e-5)
+
+    print_configuration(problem_num, train_data_path, test_data_path, EPOCHS, lrs)
 
     if (problem_num == 1):
         models = [BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=9,
@@ -109,8 +122,9 @@ if __name__ == "__main__":
         model.to(device)
         train_model(model, train_loader, optimizer, EPOCHS)
         torch.save(model.state_dict(), f"{folder_names[problem_num]}/{lrs[i]}.pth")
+
         # TODO: Vary this for different quantization levels
-        model.to(torch.float16)
+        model.to(torch.float32)
 
         start_time = time.time()
         if (problem_num == 1):
@@ -124,6 +138,7 @@ if __name__ == "__main__":
             av = "weighted"
         else:
             av = "binary"
+
         f1 = f1_score(labels, predictions, average=av)
         accuracy = np.mean(labels == predictions)
 
