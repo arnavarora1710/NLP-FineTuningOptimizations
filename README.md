@@ -27,3 +27,9 @@ quantization framework, thus preserving some amount of information
 lost. This weight aggregation strategy aims to mitigate loss 
 effectively while maintaining or even 
 improving the performance of the models.
+
+In order to train the models, please run the following commands from inside the src folder for usage:
+python train.py
+
+To soup the individual models, run the following command from the src folder for usage:
+python souper.py
