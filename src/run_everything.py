@@ -1,4 +1,4 @@
-import subprocess
+import os, subprocess
 
 # Change configs here!
 
@@ -7,6 +7,16 @@ import subprocess
 
 # USAGE FOR SOUPER:
 # python3 souper.py <problem_num> <test_data_path> <weights_folder> <quantize_or_not> <soup_type>
+
+# Create result directories if they don't exist
+result_directories = [
+    "../results/sql",
+    "../results/crisis",
+    "../results/stock"
+]
+
+for directory in result_directories:
+    os.makedirs(directory, exist_ok=True)
 
 configs = [
     "python3 ../src/train.py 1 ../data/SQLInjections/sqli.csv ../data/SQLInjections/sqliv2.csv 15 1e-5 2e-5 3e-5",
