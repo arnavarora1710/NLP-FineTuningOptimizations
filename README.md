@@ -28,10 +28,8 @@ lost. This weight aggregation strategy aims to mitigate loss
 effectively while maintaining or even 
 improving the performance of the models.
 
-In order to train the models, please run the following commands from inside the src folder for usage:
+We have made a script to run the training and inference together. Please run the following commands from inside the src folder:
 
-```python train.py```
+```python3 run_everything.py```
 
-To soup the individual models, run the following command from the src folder for usage:
-
-```python souper.py```
+The configurations are listed with their usage in the script itself, so any changes to the configurations can be made in this singular script. The results for each type of souping technique will get stored in the root directory.
