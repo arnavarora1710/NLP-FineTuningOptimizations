@@ -17,7 +17,7 @@ maps = {
 class SQLDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
         self.data = pd.read_csv(data_path, encoding='utf-16',
-        on_bad_lines='skip', header=None, names=['Sentence', 'Label'])
+        header=None, names=['Sentence', 'Label'])
         self.data = self.data[self.data['Label'].notna()]
         self.data = self.data[pd.to_numeric(self.data['Label'], errors='coerce').notnull()]
         self.tokenizer = tokenizer
@@ -43,7 +43,7 @@ def get_sql_dataloader(data_path, tokenizer, max_length, batch_size):
 
 class CrisisDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
-        self.data = pd.read_csv(data_path, encoding='utf-8', on_bad_lines='skip', header=0)
+        self.data = pd.read_csv(data_path, encoding='utf-8', header=0)
         self.data = self.data[self.data['label'].notna()]
         self.data['label'] = self.data['label'].apply(lambda x: maps[x])
         self.tokenizer = tokenizer
@@ -69,7 +69,7 @@ def get_crisis_dataloader(data_path, tokenizer, max_length, batch_size):
 
 class StockDataset(Dataset):
     def __init__(self, data_path, tokenizer, max_length):
-        self.data = pd.read_csv(data_path, encoding='utf-8', on_bad_lines='skip', header=0)
+        self.data = pd.read_csv(data_path, encoding='utf-8', header=0)
         self.data.fillna('', inplace=True)
         self.data['Concatenated_Top'] = self.data.apply(lambda row: ';'.join(row[2:]), axis=1)
         self.data = self.data[self.data['Label'].notna()]
