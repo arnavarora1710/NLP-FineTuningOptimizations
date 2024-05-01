@@ -73,7 +73,7 @@ def test_weights(model, weights, test_dataset, test_dataloader, quantize, multi_
     return accuracy
     
 def print_configuration(problem_num, test_data_path, weights_folder, quantize, soup_type):
-    print("Configuration:")
+    print("Souping Configuration:")
     print(f"Problem Number: {problem_num}")
     print(f"Test Data Path: {test_data_path}")
     print(f"Weights Folder: {weights_folder}")

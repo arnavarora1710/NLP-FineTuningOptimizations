@@ -72,7 +72,7 @@ def test_model_2(model, test_dataset, test_loader):
     return labels, predictions
 
 def print_configuration(problem_num, train_data_path, test_data_path, num_epochs, learning_rates):
-    print("Configuration:")
+    print("Training Configuration:")
     print(f"Problem Number: {problem_num}")
     print(f"Train Data Path: {train_data_path}")
     print(f"Test Data Path: {test_data_path}")
